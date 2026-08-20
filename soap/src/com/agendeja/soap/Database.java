@@ -8,7 +8,8 @@ import java.sql.Statement;
 public class Database {
 
     // Aponta para o banco Django REST (tabelas servicos e clientes já existem lá)
-    private static final String URL = "jdbc:sqlite:../../agendeja_rest/db.sqlite3";
+    private static final String SQLITE_PATH = System.getenv().getOrDefault("DB_SQLITE_PATH", "../../agendeja_rest/db.sqlite3");
+    private static final String URL = "jdbc:sqlite:" + SQLITE_PATH;
 
     public static Connection connect() throws SQLException {
         return DriverManager.getConnection(URL);
