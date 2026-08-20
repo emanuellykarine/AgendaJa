@@ -1,0 +1,91 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: agendeja-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rest:
+    build:
+      context: .
+      dockerfile: agendeja_rest/Dockerfile
+    container_name: agendeja-rest
+    environment:
+      DJANGO_DB_PATH: /data/db.sqlite3
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8001"
+    volumes:
+      - db_data:/data
+    ports:
+      - "8001:8001"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  soap:
+    build:
+      context: .
+      dockerfile: soap/Dockerfile
+    container_name: agendeja-soap
+    environment:
+      DB_SQLITE_PATH: /data/db.sqlite3
+      SOAP_HOST: 0.0.0.0
+      SOAP_PORT: "8088"
+    volumes:
+      - db_data:/data
+    ports:
+      - "8088:8088"
+    depends_on:
+      - rest
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: agendeja-gateway
+    environment:
+      REST_URL: http://rest:8001
+      SOAP_WSDL: http://soap:8088/soap/agendamento?wsdl
+      RABBITMQ_HOST: rabbitmq
+      ENABLE_EMBEDDED_CONSUMER: "false"
+    ports:
+      - "8000:8000"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      rest:
+        condition: service_started
+      soap:
+        condition: service_started
+
+  mq-consumer:
+    build:
+      context: .
+      dockerfile: gateway/mq/Dockerfile
+    container_name: agendeja-mq-consumer
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      GATEWAY_WS_URL: ws://gateway:8000/ws
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      gateway:
+        condition: service_started
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: agendeja-frontend
+    ports:
+      - "5500:5500"
+    depends_on:
+      - gateway
+
+volumes:
+  db_data:
