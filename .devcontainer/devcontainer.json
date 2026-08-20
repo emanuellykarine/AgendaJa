@@ -20,7 +20,19 @@
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:2": {},
 		"ghcr.io/devcontainers/features/java:1": {
-			"version": "21"
+			"version": "21" //versão do jdk, precisa de zip e unzip pq a feature java precisa e sem essa feature dava erro de build.
+		}
+	},
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"vscjava.vscode-java-pack",
+				"redhat.vscode-xml",
+				"ms-azuretools.vscode-docker"
+			]
 		}
 	}
 
