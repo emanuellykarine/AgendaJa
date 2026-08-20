@@ -3,10 +3,14 @@ import json
 import asyncio
 import websockets
 import threading
+import os
+
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
+GATEWAY_WS_URL = os.getenv("GATEWAY_WS_URL", "ws://localhost:8000/ws")
 
 async def enviar_ws(msg):
     try:
-        async with websockets.connect("ws://localhost:8000/ws") as ws:
+        async with websockets.connect(GATEWAY_WS_URL) as ws:
             print("Consumer conectado ao gateway")
             await ws.send(msg)
             print("Consumer enviou:", msg)
@@ -30,9 +34,18 @@ def callback(ch, method, properties, body):
     payload = dados["dados"]
 
     if evento == "novo_agendamento":
-        msg = f"Novo agendamento: {payload}"
+        texto = f"Novo agendamento: {payload}"
     else:
-        msg = f"Agendamento cancelado: {payload}"
+        texto = f"Agendamento cancelado: {payload}"
+
+    msg = json.dumps({
+        "type": "mq_event",
+        "evento": evento,
+        "dados": payload,
+        "texto": texto,
+        "from_rabbitmq": True,
+        "new_notification": True
+    })
 
     # Executa a função assíncrona em uma thread separada
     thread = threading.Thread(target=executar_async, args=(msg,))
@@ -40,7 +53,7 @@ def callback(ch, method, properties, body):
 
 def main():
     connection = pika.BlockingConnection(
-        pika.ConnectionParameters('localhost')
+        pika.ConnectionParameters(RABBITMQ_HOST)
     )
     channel = connection.channel()
 

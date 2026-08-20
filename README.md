@@ -124,7 +124,47 @@ Comunicação via sockets para chat em tempo real entre clientes e profissionais
 
 # 📌 2. Como rodar o projeto
 
-## 🔧 Pré-requisitos
+## 🐳 2.1 Execução com Docker Compose (recomendado)
+
+Com Docker, todos os serviços sobem com um único comando, usando versões consistentes em qualquer máquina.
+
+### Pré-requisito
+
+- Docker Desktop (com Docker Compose v2)
+
+### Subir tudo
+
+```bash
+docker compose up --build
+```
+
+### Serviços e portas
+
+- API Gateway (FastAPI): http://localhost:8000/docs
+- REST (Django): http://localhost:8001
+- SOAP (WSDL): http://localhost:8088/soap/agendamento?wsdl
+- Frontend: http://localhost:5500
+- RabbitMQ Management: http://localhost:15672 (guest/guest)
+
+### Derrubar ambiente
+
+```bash
+docker compose down
+```
+
+### Derrubar ambiente removendo volumes
+
+```bash
+docker compose down -v
+```
+
+> O banco SQLite é compartilhado entre REST e SOAP em um volume Docker para manter compatibilidade com a modelagem atual.
+
+---
+
+## 🔧 2.2 Execução manual (legado)
+
+### Pré-requisitos
 
 - Python 3.11
 - Java 21 (JDK)
@@ -132,7 +172,7 @@ Comunicação via sockets para chat em tempo real entre clientes e profissionais
   - Windows: https://www.rabbitmq.com/install-windows.html
   - Ou via Docker: `docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management`
 
-## 🚀 Instalação
+### Instalação
 
 python -m venv venv
 
@@ -148,7 +188,7 @@ Abra 5 terminais e ative o ambiente virtual, depois rode cada serviço abaixo:
 4. **Consumer (Mensageria)**
 5. **Frontend (HTTP Server)**
 
-## 🔵 2.1 API REST (Django)
+## 🔵 2.3 API REST (Django)
 
 cd agendeja_rest
 
@@ -167,7 +207,7 @@ Endpoints:
 
 ---
 
-## 🟧 2.2 Servidor SOAP (Java 21 com JAX-WS)
+## 🟧 2.4 Servidor SOAP (Java 21 com JAX-WS)
 
 JAX-WS foi removido após o Java 8 → por isso incluí as dependências em `/lib`.
 (é a tecnologia projetada para criar web service em SOAP, gera automaticamente o WSDL e permite compatibilidade com o cliente)
@@ -188,7 +228,7 @@ http://localhost:8088/soap/agendamento?wsdl
 
 ---
 
-## 🔴 2.3 API Gateway (FastAPI)
+## 🔴 2.5 API Gateway (FastAPI)
 
 ✔ Traduz SOAP → JSON  
 ✔ Integra REST  
@@ -212,7 +252,7 @@ ws://localhost:8000/ws
 
 ---
 
-## 🟩 2.4 Consumidor de Mensageria (RabbitMQ)
+## 🟩 2.6 Consumidor de Mensageria (RabbitMQ)
 
 Consome eventos da fila RabbitMQ e envia notificações via WebSocket.
 
@@ -236,7 +276,7 @@ python consumer.py
 ---
 
 
-## 🟦 2.5 Cliente Web (Frontend)
+## 🟦 2.7 Cliente Web (Frontend)
 
 ### Rode em outro terminal:
 
@@ -247,7 +287,7 @@ python -m http.server 5500
 
 --- 
 
-## 🟧 2.6 Servidor  socket TCP/UDP (Python)
+## 🟧 2.8 Servidor  socket TCP/UDP (Python)
 
 Sistema de chat em tempo real utilizando protocolos TCP e UDP para comunicação entre clientes e profissionais.
 

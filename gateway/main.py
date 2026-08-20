@@ -10,15 +10,36 @@ import pika
 import json
 from datetime import datetime
 from pathlib import Path
+import os
 
 from mq_consumer import start_mq_consumer
 from chat_persistence import load_room_messages, save_message
 
 app = FastAPI(title="API Gateway - AgendeJá")
 
+# ===== CONFIGURAÇÕES =====
+REST_URL = os.getenv("REST_URL", "http://localhost:8001")
+SOAP_WSDL = os.getenv("SOAP_WSDL", "http://localhost:8088/soap/agendamento?wsdl")
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
+ENABLE_EMBEDDED_CONSUMER = os.getenv("ENABLE_EMBEDDED_CONSUMER", "false").lower() == "true"
+
+soap_client = None
+
+
+def get_soap_client():
+    """Inicializa o cliente SOAP sob demanda para evitar falha no startup."""
+    global soap_client
+    if soap_client is None:
+        soap_client = Client(SOAP_WSDL)
+    return soap_client
+
 # ===== INICIALIZA CONSUMER RABBITMQ NO STARTUP =====
 @app.on_event("startup")
 def startup_event():
+    if not ENABLE_EMBEDDED_CONSUMER:
+        print("[Startup] Consumer embutido desabilitado.")
+        return
+
     loop = asyncio.get_event_loop()
     thread = threading.Thread(
         target=start_mq_consumer,
@@ -26,12 +47,6 @@ def startup_event():
         daemon=True
     )
     thread.start()
-
-# ===== CONFIGURAÇÕES =====
-REST_URL = "http://localhost:8001"
-SOAP_WSDL = "http://localhost:8088/soap/agendamento?wsdl"
-
-soap_client = Client(SOAP_WSDL)
 
 # CORS
 app.add_middleware(
@@ -45,7 +60,7 @@ app.add_middleware(
 # ===== MENSAGERIA COM RABBITMQ =====
 def enviar_mensagem_mq(evento, dados):
     connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host='localhost')
+        pika.ConnectionParameters(host=RABBITMQ_HOST)
     )
     channel = connection.channel()
     channel.queue_declare(queue='agendamentos')
@@ -123,13 +138,13 @@ async def login(request: Request):
 # ===== ROTAS SOAP (AGENDAMENTOS) =====
 @app.get("/disponibilidade", tags=["Agendamentos"])
 def disponibilidade(data: str, servico_id: int):
-    resposta = soap_client.service.consultarDisponibilidade(data, servico_id)
+    resposta = get_soap_client().service.consultarDisponibilidade(data, servico_id)
     return {"data": data, "servico_id": servico_id, "horarios_disponiveis": resposta.split(",") if resposta and not resposta.startswith("Erro") else []}
 
 @app.post("/agendar", tags=["Agendamentos"])
 async def agendar(clienteId: int, servicoId: int, data: str, horaInicio: str):
     resposta = await run_in_threadpool(
-        lambda: soap_client.service.agendarServico(
+        lambda: get_soap_client().service.agendarServico(
             clienteId, servicoId, data, horaInicio
         )
     )
@@ -149,7 +164,7 @@ async def agendar(clienteId: int, servicoId: int, data: str, horaInicio: str):
 @app.delete("/cancelar", tags=["Agendamentos"])
 async def cancelar(agendamentoId: int):
     resposta = await run_in_threadpool(
-        lambda: (soap_client.service.cancelarAgendamento(agendamentoId))
+        lambda: (get_soap_client().service.cancelarAgendamento(agendamentoId))
     )
 
     enviar_mensagem_mq(
@@ -163,7 +178,7 @@ async def cancelar(agendamentoId: int):
 
 @app.get("/listarAgendamentos", tags=["Agendamentos"])
 def listar_agendamentos():
-    resposta = soap_client.service.listarAgendamentos()
+    resposta = get_soap_client().service.listarAgendamentos()
     agendamentos = json.loads(resposta)
     return {"agendamentos": agendamentos}
 
