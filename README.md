@@ -160,6 +160,20 @@ docker compose down -v
 
 > O banco SQLite é compartilhado entre REST e SOAP em um volume Docker para manter compatibilidade com a modelagem atual.
 
+### 🧩 Alternativa: rodando via Dev Container
+
+Para quem usa VS Code, o projeto tem um Dev Container configurado em [.devcontainer/devcontainer.json](.devcontainer/devcontainer.json), que reaproveita o `docker-compose.yml` acima e já vem com Python 3.11, JDK 21 e as extensões usadas no projeto (Python, Java, Docker) pré-instaladas — sem precisar configurar nada manualmente.
+
+**Pré-requisito:** extensão [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) instalada no VS Code.
+
+1. Abra o projeto no VS Code.
+2. `Ctrl+Shift+P` (ou `Cmd+Shift+P` no Mac) → `Dev Containers: Reopen in Container`.
+3. Aguarde o build inicial (a primeira vez demora mais, pois builda as imagens e instala as features).
+
+Também funciona diretamente em um GitHub Codespace, sem precisar do VS Code local.
+
+> Se a porta 5672 do RabbitMQ já estiver em uso no seu host (ex: um RabbitMQ instalado nativamente), o compose expõe o broker em `5673:5672` — a comunicação entre os containers continua interna via `rabbitmq:5672`, então isso não afeta o funcionamento do projeto.
+
 ---
 
 ## 🔧 2.2 Execução manual (legado)
