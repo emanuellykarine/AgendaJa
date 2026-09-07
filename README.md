@@ -538,3 +538,31 @@ O WebSocket está integrado ao API Gateway e permite:
 - ✅ Chat em tempo real com TCP/UDP
 
 ---
+
+# 📌 10. CI - Integração Contínua (GitHub Actions)
+
+O projeto tem um pipeline de build configurado em [.github/workflows/build.yml](.github/workflows/build.yml), que valida automaticamente se o projeto continua compilando.
+
+### Quando roda
+
+- A cada `push` em qualquer branch
+- A cada `pull request`
+- Manualmente, pelo botão **Run workflow** na aba **Actions** (`workflow_dispatch`)
+
+### O que o pipeline faz
+
+Um único job (`build`), executado em `ubuntu-latest`:
+
+| Passo | O que valida |
+|---|---|
+| Configurar Python 3.11 + instalar `requirements.txt` | As dependências do REST, Gateway e cliente SOAP instalam sem conflito |
+| `python -m compileall agendeja_rest gateway chat_tcp_udp` | Não há erro de sintaxe em nenhum módulo Python |
+| `python manage.py check` | O projeto Django está configurado corretamente |
+| Configurar JDK 21 (Temurin) | Ambiente Java do servidor SOAP |
+| `javac -cp "lib/*" -d build src/com/agendeja/soap/*.java` | O servidor SOAP compila |
+
+### Acompanhar as execuções
+
+O resultado de cada execução fica na aba [Actions](https://github.com/emanuellykarine/AgendaJa/actions) do repositório. O GitHub também exibe o status (✓ ou ✗) ao lado de cada commit e dentro dos pull requests.
+
+---

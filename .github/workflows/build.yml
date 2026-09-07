@@ -1,0 +1,43 @@
+name: Build AgendeJá
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build do projeto (Python + Java)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependências Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Checar sintaxe dos módulos Python
+        run: python -m compileall -q agendeja_rest gateway chat_tcp_udp
+
+      - name: Validar projeto Django
+        working-directory: agendeja_rest
+        run: python manage.py check
+
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Compilar o servidor SOAP
+        working-directory: soap
+        run: javac -cp "lib/*" -d build src/com/agendeja/soap/*.java
