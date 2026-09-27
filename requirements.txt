@@ -9,7 +9,7 @@ uvicorn==0.54.0
 # CLIENTE SOAP EM PYTHON
 zeep==4.3.3
 # COMUNICAÇÃO HTTP
-requests==2.33.0
+requests==2.34.2
 # UTILIDADES
 python-dotenv==1.2.2
 pydantic==2.13.5
