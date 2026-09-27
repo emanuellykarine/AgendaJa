@@ -1,7 +1,5 @@
-# Versionamento semântico e LTS
+# Atividade I.V: Versionamento Semântico e LTS
 
-**Projeto:** AgendaJá  
-**Data da pesquisa:** 27/09/2026
 
 ## Componentes analisados
 

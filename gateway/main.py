@@ -11,11 +11,10 @@ import json
 from datetime import datetime
 from pathlib import Path
 import os
+from contextlib import asynccontextmanager
 
 from mq_consumer import start_mq_consumer
 from chat_persistence import load_room_messages, save_message
-
-app = FastAPI(title="API Gateway - AgendeJá")
 
 # ===== CONFIGURAÇÕES =====
 REST_URL = os.getenv("REST_URL", "http://localhost:8001")
@@ -34,19 +33,23 @@ def get_soap_client():
     return soap_client
 
 # ===== INICIALIZA CONSUMER RABBITMQ NO STARTUP =====
-@app.on_event("startup")
-def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     if not ENABLE_EMBEDDED_CONSUMER:
         print("[Startup] Consumer embutido desabilitado.")
-        return
+    else:
+        loop = asyncio.get_running_loop()
+        thread = threading.Thread(
+            target=start_mq_consumer,
+            args=(loop, broadcast_message),
+            daemon=True
+        )
+        thread.start()
 
-    loop = asyncio.get_event_loop()
-    thread = threading.Thread(
-        target=start_mq_consumer,
-        args=(loop, broadcast_message),
-        daemon=True
-    )
-    thread.start()
+    yield
+
+
+app = FastAPI(title="API Gateway - AgendeJá", lifespan=lifespan)
 
 # CORS
 app.add_middleware(
