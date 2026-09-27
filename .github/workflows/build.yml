@@ -24,7 +24,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest ruff==0.16.9
+          pip install pytest ruff==0.16.9 pip-audit
+
+      - name: Auditar bibliotecas Python
+        run: pip-audit -r requirements.txt
 
       - name: Analisar arquivos Python
         run: ruff check --select UP005,UP019,UP023,UP026,UP035,UP051 agendeja_rest gateway chat_tcp_udp
