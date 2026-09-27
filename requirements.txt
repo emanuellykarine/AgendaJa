@@ -11,7 +11,7 @@ zeep==4.3.3
 # COMUNICAÇÃO HTTP
 requests==2.33.0
 # UTILIDADES
-python-dotenv==1.2.2
+python-dotenv==1.2.3
 pydantic==2.13.5
 lxml==6.1.0
 # Mensageria
