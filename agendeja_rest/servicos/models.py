@@ -15,7 +15,7 @@ class Cliente(models.Model):
 
     def __str__(self):
         return self.usuario.nome
-    
+
 class Profissional(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, related_name='profissional')
     especialidade = models.CharField(max_length=100, blank=True)
@@ -23,7 +23,7 @@ class Profissional(models.Model):
 
     def __str__(self):
         return self.usuario.nome
-    
+
 # um serviço é relacionado a um profissional
 class Servico(models.Model):
     nome = models.CharField(max_length=100)

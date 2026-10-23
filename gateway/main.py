@@ -9,7 +9,6 @@ from zeep import Client
 import pika
 import json
 from datetime import datetime
-from pathlib import Path
 import os
 from contextlib import asynccontextmanager
 
@@ -198,10 +197,10 @@ async def save_chat_message(request: Request):
     try:
         data = await request.json()
         room = data.get('room')
-        
+
         if not room:
             return JSONResponse({"error": "room obrigatória"}, status_code=400)
-        
+
         message = {
             'user_id': data.get('user_id'),
             'username': data.get('username'),
@@ -209,9 +208,9 @@ async def save_chat_message(request: Request):
             'room': room,
             'timestamp': data.get('timestamp', datetime.now().isoformat())
         }
-        
+
         save_message(room, message)
-        
+
         return {"status": "ok", "message": message}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
@@ -222,17 +221,17 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections = []
         self.notifications_enabled = {}  # {user_id: bool}
-    
+
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
         print(f"[WS] Conectado. Total: {len(self.active_connections)}")
-    
+
     def disconnect(self, websocket: WebSocket):
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
             print(f"[WS] Desconectado. Total: {len(self.active_connections)}")
-    
+
     async def broadcast_to_all(self, message: dict):
         """Envia para TODOS os clientes WebSocket"""
         disconnected = []
@@ -242,7 +241,7 @@ class ConnectionManager:
             except Exception as e:
                 print(f"[WS] Erro ao enviar: {e}")
                 disconnected.append(ws)
-        
+
         for ws in disconnected:
             self.disconnect(ws)
 
@@ -253,12 +252,12 @@ connected_clients = []  # compatibilidade com mq_consumer
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     connected_clients.append(websocket)
-    
+
     try:
         while True:
             msg = await websocket.receive_text()
             message = json.loads(msg)
-            
+
             # Se for mensagem de chat, salvar e fazer broadcast
             if message.get('type') == 'chat_message':
                 room = message.get('room')
@@ -270,7 +269,7 @@ async def websocket_endpoint(websocket: WebSocket):
             else:
                 # Outros eventos, apenas fazer broadcast
                 await manager.broadcast_to_all(message)
-    
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         if websocket in connected_clients:
@@ -283,12 +282,12 @@ async def broadcast_message(msg):
             message = json.loads(msg)
         else:
             message = msg
-        
+
         print(f"[RabbitMQ→WS] Evento: {message.get('evento', '?')}")
         # Adicionar flag de notificação para o chat
         message['from_rabbitmq'] = True
         message['new_notification'] = True
-        
+
         await manager.broadcast_to_all(message)
     except Exception as e:
         print(f"[WS ERROR] Erro ao processar RabbitMQ: {e}")

@@ -6,8 +6,6 @@ Este arquivo contém exemplos de código para diferentes cenários
 """
 
 import json
-import socket
-import time
 
 # ============================================================================
 # EXEMPLO 1: Cliente Django enviando dados para Chat
@@ -18,10 +16,10 @@ class ExemploAutenticacao:
     Exemplo de como o sistema de login Django retorna dados
     que serão utilizados pelo chat
     """
-    
+
     def exemplo_resposta_login(self):
         """Simula resposta do endpoint /login do Django"""
-        
+
         # Resposta típica do Django
         resposta_django = {
             'sucesso': True,
@@ -32,21 +30,21 @@ class ExemploAutenticacao:
             'email': 'joao@example.com',
             'telefone': '(11) 98765-4321'
         }
-        
+
         # Frontend salva no localStorage
         # localStorage.setItem('user', JSON.stringify(resposta_django))
-        
+
         # Chat.js recupera e usa
         # const user = getUser(); // Retorna o JSON acima
-        
+
         return resposta_django
-    
+
     def exemplo_login_chat(self):
         """Simula cliente conectando ao Chat com dados do Django"""
-        
+
         # Dados recuperados do localStorage
         user_data = self.exemplo_resposta_login()
-        
+
         # Mensagem TCP Login
         tcp_login = {
             'type': 'login',
@@ -55,7 +53,7 @@ class ExemploAutenticacao:
             'role': user_data['role'],              # cliente
             'profile_id': user_data['profile_id']   # 1
         }
-        
+
         return tcp_login
 
 
@@ -65,10 +63,10 @@ class ExemploAutenticacao:
 
 class ExemploTCPClient:
     """Exemplos de operações TCP"""
-    
+
     def conectar_tcp(self):
         """Conectar ao servidor TCP com autenticação"""
-        
+
         # Dados do usuário logado
         login_data = {
             'type': 'login',
@@ -77,35 +75,35 @@ class ExemploTCPClient:
             'role': 'cliente',
             'profile_id': 8
         }
-        
+
         print("[EXEMPLO] Conectando ao TCP com dados:")
         print(json.dumps(login_data, indent=2))
         print()
-    
+
     def entrar_sala(self):
         """Entrar em uma sala"""
-        
+
         msg = {
             'type': 'join_room',
             'room': 'atendimento_maria'
         }
-        
+
         print("[EXEMPLO] Entrando em sala:")
         print(json.dumps(msg, indent=2))
         print()
-    
+
     def solicitar_historico(self):
         """Solicitar histórico de mensagens"""
-        
+
         msg = {
             'type': 'get_history',
             'room': 'atendimento_maria'
         }
-        
+
         print("[EXEMPLO] Solicitando histórico:")
         print(json.dumps(msg, indent=2))
         print()
-        
+
         # Resposta típica do servidor
         resposta = {
             'type': 'history',
@@ -123,7 +121,7 @@ class ExemploTCPClient:
                 }
             ]
         }
-        
+
         print("[EXEMPLO] Resposta do servidor:")
         print(json.dumps(resposta, indent=2))
         print()
@@ -135,24 +133,24 @@ class ExemploTCPClient:
 
 class ExemploUDPClient:
     """Exemplos de operações UDP"""
-    
+
     def registrar_udp(self):
         """Registrar no servidor UDP"""
-        
+
         msg = {
             'type': 'register',
             'username': 'maria.santos',
             'room': 'atendimento_maria',
             'user_id': 15
         }
-        
+
         print("[EXEMPLO] Registrando no UDP:")
         print(json.dumps(msg, indent=2))
         print()
-    
+
     def enviar_mensagem(self):
         """Enviar mensagem para sala"""
-        
+
         msg = {
             'type': 'message',
             'username': 'maria.santos',
@@ -160,11 +158,11 @@ class ExemploUDPClient:
             'text': 'Olá! Tudo bem?',
             'room': 'atendimento_maria'
         }
-        
+
         print("[EXEMPLO] Enviando mensagem UDP:")
         print(json.dumps(msg, indent=2))
         print()
-        
+
         # Broadcast recebido por todos na sala
         print("[EXEMPLO] Broadcast recebido por outros clientes:")
         broadcast = {
@@ -177,17 +175,17 @@ class ExemploUDPClient:
         }
         print(json.dumps(broadcast, indent=2))
         print()
-    
+
     def notificar_digitacao(self):
         """Notificar que está digitando"""
-        
+
         msg = {
             'type': 'typing',
             'username': 'maria.santos',
             'user_id': 15,
             'room': 'atendimento_maria'
         }
-        
+
         print("[EXEMPLO] Notificando digitação:")
         print(json.dumps(msg, indent=2))
         print()
@@ -199,17 +197,17 @@ class ExemploUDPClient:
 
 class ExemploFluxoCompleto:
     """Exemplo de fluxo completo de conversa"""
-    
+
     def fluxo_atendimento(self):
         """
         Fluxo completo:
         Cliente agende serviço e conversa com profissional via chat
         """
-        
+
         print("\n" + "="*70)
         print("EXEMPLO: CLIENTE CONVERSA COM PROFISSIONAL APÓS AGENDAMENTO")
         print("="*70 + "\n")
-        
+
         # PASSO 1: Cliente faz login
         print("1. CLIENTE FAZ LOGIN")
         print("-" * 70)
@@ -226,20 +224,20 @@ class ExemploFluxoCompleto:
         }
         print(json.dumps(login_response, indent=2))
         print()
-        
+
         # PASSO 2: localStorage recebe dados
         print("2. DADOS SALVOS NO LOCALSTORAGE")
         print("-" * 70)
         print("localStorage.setItem('user', JSON.stringify(response))")
         print("Dados disponíveis no frontend até logout")
         print()
-        
+
         # PASSO 3: Cliente clica em Chat
         print("3. CLIENTE CLICA EM BOTÃO CHAT")
         print("-" * 70)
         print("Navega para: frontend/chat.html")
         print()
-        
+
         # PASSO 4: Chat.js conecta
         print("4. CHAT.JS INICIALIZA CONEXÃO")
         print("-" * 70)
@@ -263,14 +261,14 @@ class ExemploFluxoCompleto:
         }
         print(json.dumps(udp_register, indent=2))
         print()
-        
+
         # PASSO 5: Cliente seleciona sala
         print("5. CLIENTE SELECIONA SALA DE CHAT")
         print("-" * 70)
         print("Sala: chat_agendamento_15")
         print("Descrição: Chat com Prof. Carlos (Corte de Cabelo)")
         print()
-        
+
         # PASSO 6: Entra na sala (TCP)
         print("6. CLIENTE ENTRA NA SALA (TCP)")
         print("-" * 70)
@@ -281,7 +279,7 @@ class ExemploFluxoCompleto:
         print("Enviando:")
         print(json.dumps(join_msg, indent=2))
         print()
-        
+
         # PASSO 7: Solicita histórico
         print("7. CLIENTE SOLICITA HISTÓRICO (TCP)")
         print("-" * 70)
@@ -293,7 +291,7 @@ class ExemploFluxoCompleto:
         print(json.dumps(history_msg, indent=2))
         print("\nRespostas anteriores carregadas...")
         print()
-        
+
         # PASSO 8: Cliente envia mensagem
         print("8. CLIENTE ENVIA MENSAGEM (UDP)")
         print("-" * 70)
@@ -308,7 +306,7 @@ class ExemploFluxoCompleto:
         print(json.dumps(client_msg, indent=2))
         print("\nMensagem armazenada via TCP e broadcast via UDP")
         print()
-        
+
         # PASSO 9: Profissional recebe
         print("9. PROFISSIONAL RECEBE MENSAGEM")
         print("-" * 70)
@@ -323,7 +321,7 @@ class ExemploFluxoCompleto:
         print("Broadcast recebido:")
         print(json.dumps(prof_receives, indent=2))
         print()
-        
+
         # PASSO 10: Profissional responde
         print("10. PROFISSIONAL RESPONDE")
         print("-" * 70)
@@ -337,7 +335,7 @@ class ExemploFluxoCompleto:
         print("Enviando:")
         print(json.dumps(prof_msg, indent=2))
         print()
-        
+
         # PASSO 11: Cliente recebe e responde
         print("11. CLIENTE RECEBE E RESPONDE")
         print("-" * 70)
@@ -351,14 +349,14 @@ class ExemploFluxoCompleto:
         print("Enviando:")
         print(json.dumps(client_reply, indent=2))
         print()
-        
+
         # PASSO 12: Conversa continua
         print("12. CONVERSA CONTINUA...")
         print("-" * 70)
         print("Mensagens armazenadas no histórico (TCP)")
         print("Novos usuários podem recuperar histórico completo")
         print()
-        
+
         print("="*70)
         print("✓ FLUXO COMPLETO DE CONVERSA CONCLUÍDO")
         print("="*70 + "\n")
@@ -370,14 +368,14 @@ class ExemploFluxoCompleto:
 
 class ExemploServidorTCP:
     """Exemplos de dados armazenados no servidor TCP"""
-    
+
     def estado_servidor(self):
         """Estado do servidor TCP após a conversa"""
-        
+
         print("\n" + "="*70)
         print("EXEMPLO: ESTADO DO SERVIDOR TCP DURANTE CONVERSA")
         print("="*70 + "\n")
-        
+
         # Clientes conectados
         print("CLIENTES CONECTADOS:")
         print("-" * 70)
@@ -395,7 +393,7 @@ class ExemploServidorTCP:
         }
         print(json.dumps(clients, indent=2))
         print()
-        
+
         # Salas
         print("SALAS ATIVAS:")
         print("-" * 70)
@@ -404,7 +402,7 @@ class ExemploServidorTCP:
         }
         print(json.dumps(rooms, indent=2))
         print()
-        
+
         # Histórico
         print("HISTÓRICO DA SALA:")
         print("-" * 70)
@@ -437,18 +435,18 @@ class ExemploServidorTCP:
 
 def main():
     """Executar todos os exemplos"""
-    
+
     print("\n" + "="*70)
     print("EXEMPLOS PRÁTICOS: CHAT TCP/UDP INTEGRADO")
     print("="*70 + "\n")
-    
+
     # Exemplo 1
     ex1 = ExemploAutenticacao()
     print("EXEMPLO 1: AUTENTICAÇÃO DO DJANGO")
     print("="*70)
     ex1.exemplo_resposta_login()
     ex1.exemplo_login_chat()
-    
+
     # Exemplo 2
     ex2 = ExemploTCPClient()
     print("\nEXEMPLO 2: OPERAÇÕES TCP")
@@ -456,7 +454,7 @@ def main():
     ex2.conectar_tcp()
     ex2.entrar_sala()
     ex2.solicitar_historico()
-    
+
     # Exemplo 3
     ex3 = ExemploUDPClient()
     print("\nEXEMPLO 3: OPERAÇÕES UDP")
@@ -464,15 +462,15 @@ def main():
     ex3.registrar_udp()
     ex3.enviar_mensagem()
     ex3.notificar_digitacao()
-    
+
     # Exemplo 4
     ex4 = ExemploFluxoCompleto()
     ex4.fluxo_atendimento()
-    
+
     # Exemplo 5
     ex5 = ExemploServidorTCP()
     ex5.estado_servidor()
-    
+
     print("\n" + "="*70)
     print("✓ TODOS OS EXEMPLOS EXECUTADOS COM SUCESSO")
     print("="*70 + "\n")
