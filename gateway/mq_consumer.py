@@ -1,9 +1,7 @@
-import pika
-import json
 import asyncio
-import os
+import json
 
-RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
+from mq.runner import start_consumer
 
 def start_mq_consumer(loop, broadcast_message):
     def callback(ch, method, properties, body):
@@ -16,16 +14,4 @@ def start_mq_consumer(loop, broadcast_message):
             loop
         )
 
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host=RABBITMQ_HOST)
-    )
-    channel = connection.channel()
-    channel.queue_declare(queue='agendamentos')
-
-    channel.basic_consume(
-        queue='agendamentos',
-        on_message_callback=callback,
-        auto_ack=True
-    )
-
-    channel.start_consuming()
+    start_consumer(callback)
