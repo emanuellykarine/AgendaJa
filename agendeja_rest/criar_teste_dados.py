@@ -26,7 +26,7 @@ for username, password, email, nome in usuarios:
     cursor.execute("SELECT id FROM servicos_usuario WHERE username = ?", (username,))
     if not cursor.fetchone():
         cursor.execute("""
-            INSERT INTO servicos_usuario 
+            INSERT INTO servicos_usuario
             (username, password, email, nome, telefone, is_staff, is_active, date_joined, last_login)
             VALUES (?, ?, ?, ?, '1111111111', 0, 1, ?, NULL)
         """, (username, password, email, nome, datetime.now().isoformat()))
@@ -81,7 +81,7 @@ print("\n[3] Verificando/Criando Serviços...")
 cursor.execute("SELECT id FROM servicos_servico WHERE nome = 'Corte de Cabelo'")
 if not cursor.fetchone():
     cursor.execute("""
-        INSERT INTO servicos_servico 
+        INSERT INTO servicos_servico
         (nome, descricao, duracao_min, preco, profissional_id, ativo)
         VALUES ('Corte de Cabelo', 'Corte profissional', 30, 50.00, ?, 1)
     """, (prof_id,))
@@ -102,13 +102,13 @@ hora_inicio = "14:00:00"
 hora_fim = "14:30:00"
 
 cursor.execute("""
-    SELECT id FROM agendamento 
+    SELECT id FROM agendamento
     WHERE cliente_id = ? AND servico_id = ? AND data = ? AND status = 'Confirmado'
 """, (cliente_id, servico_id, amanha.isoformat()))
 
 if not cursor.fetchone():
     cursor.execute("""
-        INSERT INTO agendamento 
+        INSERT INTO agendamento
         (cliente_id, servico_id, data, hora_inicio, hora_fim, status)
         VALUES (?, ?, ?, ?, ?, 'Confirmado')
     """, (cliente_id, servico_id, amanha.isoformat(), hora_inicio, hora_fim))
@@ -117,7 +117,7 @@ if not cursor.fetchone():
     print(f"    Data: {amanha}")
     print(f"    Hora: {hora_inicio} - {hora_fim}")
 else:
-    print(f"  → Agendamento já existe")
+    print("  → Agendamento já existe")
 
 conn.commit()
 
@@ -134,8 +134,8 @@ for usuario_id, username, nome, email in usuarios:
 
 print("")
 cursor.execute("""
-    SELECT a.id, c.usuario_id as cliente_user_id, pu.nome as profissional_nome, 
-           p.usuario_id as profissional_user_id, s.nome as servico_nome, 
+    SELECT a.id, c.usuario_id as cliente_user_id, pu.nome as profissional_nome,
+           p.usuario_id as profissional_user_id, s.nome as servico_nome,
            a.data, a.hora_inicio, a.status
     FROM agendamento a
     LEFT JOIN servicos_cliente c ON a.cliente_id = c.id

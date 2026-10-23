@@ -5,7 +5,6 @@ Armazena em JSON local - simples e eficiente
 
 import json
 from pathlib import Path
-from datetime import datetime
 
 CHAT_STORAGE_DIR = Path("./chat_data")
 CHAT_STORAGE_DIR.mkdir(exist_ok=True)
@@ -21,7 +20,7 @@ def load_room_messages(room_id):
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except:
+        except (OSError, json.JSONDecodeError):
             return []
     return []
 

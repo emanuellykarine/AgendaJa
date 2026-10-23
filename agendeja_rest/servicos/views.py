@@ -15,7 +15,7 @@ CHAT_MESSAGES_FILE = os.path.join(os.path.dirname(__file__), 'chat_messages.json
 class ServicoViewSet(viewsets.ModelViewSet):
     queryset = Servico.objects.all()
     serializer_class = ServicoSerializer
-    
+
     def get_queryset(self):
         queryset = Servico.objects.all()
         profissional_id = self.request.query_params.get('profissional', None)
@@ -44,7 +44,7 @@ def register(request):
     try:
         data = request.data
         tipo = data.get('tipo')  # 'cliente' ou 'profissional'
-        
+
         # Criar usuário
         usuario = Usuario.objects.create_user(
             username=data.get('username'),
@@ -53,7 +53,7 @@ def register(request):
             nome=data.get('nome'),
             telefone=data.get('telefone', '')
         )
-        
+
         # Criar perfil específico
         if tipo == 'cliente':
             Cliente.objects.create(
@@ -71,14 +71,14 @@ def register(request):
         else:
             usuario.delete()
             return Response({'erro': 'Tipo inválido'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         return Response({
             'sucesso': True,
             'usuario_id': usuario.id,
             'username': usuario.username,
             'role': role
         }, status=status.HTTP_201_CREATED)
-        
+
     except Exception as e:
         return Response({'erro': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -90,21 +90,21 @@ def login_view(request):
     """
     username = request.data.get('username')
     password = request.data.get('password')
-    
+
     user = authenticate(username=username, password=password)
-    
+
     if user is not None:
         # Verificar role
         role = None
         profile_id = None
-        
+
         if hasattr(user, 'cliente'):
             role = 'cliente'
             profile_id = user.cliente.id
         elif hasattr(user, 'profissional'):
             role = 'profissional'
             profile_id = user.profissional.id
-        
+
         return Response({
             'sucesso': True,
             'usuario_id': user.id,
@@ -199,7 +199,7 @@ def _load_chat_messages():
     try:
         with open(CHAT_MESSAGES_FILE, 'r') as f:
             return json.load(f)
-    except:
+    except (OSError, json.JSONDecodeError):
         return {}
 
 def _save_chat_messages(messages):
@@ -212,7 +212,7 @@ def chat_messages(request):
     """
     GET: Retorna mensagens de uma sala específica
     POST: Salva uma nova mensagem
-    
+
     Parâmetros GET: ?room=cliente_1_profissional_2
     Body POST: {
         "room": "cliente_1_profissional_2",
@@ -227,37 +227,37 @@ def chat_messages(request):
             room = request.GET.get('room')
             if not room:
                 return Response({'erro': 'room é obrigatório'}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             messages = _load_chat_messages()
             room_messages = messages.get(room, [])
             return Response(room_messages)
-        
+
         elif request.method == 'POST':
             data = request.data
             room = data.get('room')
-            
+
             if not room:
                 return Response({'erro': 'room é obrigatório'}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             message = {
                 'username': data.get('username'),
                 'user_id': data.get('user_id'),
                 'text': data.get('text'),
                 'timestamp': data.get('timestamp', datetime.now().isoformat())
             }
-            
+
             messages = _load_chat_messages()
             if room not in messages:
                 messages[room] = []
-            
+
             messages[room].append(message)
             _save_chat_messages(messages)
-            
+
             return Response({
                 'sucesso': True,
                 'message': 'Mensagem salva com sucesso',
                 'data': message
             }, status=status.HTTP_201_CREATED)
-    
+
     except Exception as e:
         return Response({'erro': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
