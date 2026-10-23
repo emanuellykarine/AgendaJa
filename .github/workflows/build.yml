@@ -24,13 +24,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest ruff==0.16.9 pip-audit
+          pip install pytest pip-audit
 
       - name: Auditar bibliotecas Python
         run: pip-audit -r requirements.txt
 
       - name: Verificar padrão de codificação PEP 8
         run: ruff check agendeja_rest gateway chat_tcp_udp
+
+      - name: Detectar código duplicado
+        run: pylint --disable=all --enable=duplicate-code agendeja_rest/agendeja_rest agendeja_rest/servicos gateway chat_tcp_udp
 
       - name: Detectar depreciações Python em runtime
         run: python -W error::DeprecationWarning -m pytest

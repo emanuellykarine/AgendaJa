@@ -1,11 +1,11 @@
-import pika
 import json
 import asyncio
 import websockets
 import threading
 import os
 
-RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
+from runner import start_consumer
+
 GATEWAY_WS_URL = os.getenv("GATEWAY_WS_URL", "ws://localhost:8000/ws")
 
 async def enviar_ws(msg):
@@ -52,21 +52,8 @@ def callback(ch, method, properties, body):
     thread.start()
 
 def main():
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(RABBITMQ_HOST)
-    )
-    channel = connection.channel()
-
-    channel.queue_declare(queue='agendamentos')
-
-    channel.basic_consume(
-        queue='agendamentos',
-        on_message_callback=callback,
-        auto_ack=True
-    )
-
     print("Consumidor esperando mensagens...")
-    channel.start_consuming()
+    start_consumer(callback)
 
 if __name__ == "__main__":
     main()
