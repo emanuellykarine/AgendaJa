@@ -1,5 +1,5 @@
 # DJANGO REST (REST API)
-Django==5.2.17
+Django==6.1.2
 djangorestframework==3.18.2
 # Caso queira o painel administrativo mais bonito (opcional)
 django-cors-headers==4.3.1
