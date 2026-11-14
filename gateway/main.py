@@ -1,25 +1,27 @@
-from fastapi import FastAPI, WebSocket, Request, WebSocketDisconnect
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-import requests
 import asyncio
+import json
+import os
 import threading
+from contextlib import asynccontextmanager
+from datetime import datetime
+
+import pika
+import requests
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 from zeep import Client
-import pika
-import json
-from datetime import datetime
-import os
-from contextlib import asynccontextmanager
 
-from mq_consumer import start_mq_consumer
 from chat_persistence import load_room_messages, save_message
+from mq_consumer import start_mq_consumer
 
 # ===== CONFIGURAÇÕES =====
 REST_URL = os.getenv("REST_URL", "http://localhost:8001")
 SOAP_WSDL = os.getenv("SOAP_WSDL", "http://localhost:8088/soap/agendamento?wsdl")
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
 ENABLE_EMBEDDED_CONSUMER = os.getenv("ENABLE_EMBEDDED_CONSUMER", "false").lower() == "true"
+HTTP_TIMEOUT = 10
 
 soap_client = None
 
@@ -33,7 +35,7 @@ def get_soap_client():
 
 # ===== INICIALIZA CONSUMER RABBITMQ NO STARTUP =====
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     if not ENABLE_EMBEDDED_CONSUMER:
         print("[Startup] Consumer embutido desabilitado.")
     else:
@@ -101,40 +103,40 @@ def gateway_root():
 # ===== ROTAS REST (DJANGO) =====
 @app.get("/servicos", tags=["Serviços"])
 def listar_servicos():
-    resp = requests.get(f"{REST_URL}/servicos/")
+    resp = requests.get(f"{REST_URL}/servicos/", timeout=HTTP_TIMEOUT)
     return resp.json()
 
 @app.get("/servicos/{profissional_id}", tags=["Serviços"])
 def listar_servicos_profissional(profissional_id: int):
-    resp = requests.get(f"{REST_URL}/servicos/?profissional={profissional_id}")
+    resp = requests.get(f"{REST_URL}/servicos/?profissional={profissional_id}", timeout=HTTP_TIMEOUT)
     return resp.json()
 
 @app.post("/servicos", tags=["Serviços"])
 async def criar_servico(request: Request):
     data = await request.json()
-    resp = requests.post(f"{REST_URL}/servicos/", json=data)
+    resp = requests.post(f"{REST_URL}/servicos/", json=data, timeout=HTTP_TIMEOUT)
     return resp.json()
 
 @app.delete("/servicos/{servico_id}", tags=["Serviços"])
 def deletar_servico(servico_id: int):
-    resp = requests.delete(f"{REST_URL}/servicos/{servico_id}/")
+    resp = requests.delete(f"{REST_URL}/servicos/{servico_id}/", timeout=HTTP_TIMEOUT)
     return {"sucesso": resp.status_code == 204}
 
 @app.get("/clientes", tags=["Clientes"])
 def listar_clientes():
-    resp = requests.get(f"{REST_URL}/clientes/")
+    resp = requests.get(f"{REST_URL}/clientes/", timeout=HTTP_TIMEOUT)
     return resp.json()
 
 @app.post("/register", tags=["Usuários"])
 async def register(request: Request):
     data = await request.json()
-    resp = requests.post(f"{REST_URL}/register/", json=data)
+    resp = requests.post(f"{REST_URL}/register/", json=data, timeout=HTTP_TIMEOUT)
     return resp.json()
 
 @app.post("/login", tags=["Usuários"])
 async def login(request: Request):
     data = await request.json()
-    resp = requests.post(f"{REST_URL}/login/", json=data)
+    resp = requests.post(f"{REST_URL}/login/", json=data, timeout=HTTP_TIMEOUT)
     return resp.json()
 
 # ===== ROTAS SOAP (AGENDAMENTOS) =====
@@ -212,7 +214,7 @@ async def save_chat_message(request: Request):
         save_message(room, message)
 
         return {"status": "ok", "message": message}
-    except Exception as e:
+    except (ValueError, OSError, KeyError, TypeError) as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
 # ===== WEBSOCKET E BROADCAST =====
@@ -238,7 +240,7 @@ class ConnectionManager:
         for ws in self.active_connections:
             try:
                 await ws.send_json(message)
-            except Exception as e:
+            except (RuntimeError, OSError, WebSocketDisconnect) as e:
                 print(f"[WS] Erro ao enviar: {e}")
                 disconnected.append(ws)
 
@@ -289,5 +291,5 @@ async def broadcast_message(msg):
         message['new_notification'] = True
 
         await manager.broadcast_to_all(message)
-    except Exception as e:
+    except (ValueError, TypeError, AttributeError) as e:
         print(f"[WS ERROR] Erro ao processar RabbitMQ: {e}")

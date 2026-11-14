@@ -35,6 +35,9 @@ jobs:
       - name: Detectar código duplicado
         run: pylint --disable=all --enable=duplicate-code agendeja_rest/agendeja_rest agendeja_rest/servicos gateway chat_tcp_udp
 
+      - name: Detectar code smells
+        run: pylint --disable=all --enable=broad-exception-caught,missing-timeout,unused-argument,wrong-import-order agendeja_rest/agendeja_rest agendeja_rest/servicos gateway
+
       - name: Detectar depreciações Python em runtime
         run: python -W error::DeprecationWarning -m pytest
 

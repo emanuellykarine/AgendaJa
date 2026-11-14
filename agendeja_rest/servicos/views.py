@@ -1,13 +1,15 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from django.contrib.auth import authenticate
-from django.db import connection
-from .models import Servico, Cliente, Profissional, Usuario
-from .serializers import ServicoSerializer, ClienteSerializer, ProfissionalSerializer, UsuarioSerializer
 import json
 import os
 from datetime import datetime
+
+from django.contrib.auth import authenticate
+from django.db import DatabaseError, IntegrityError, connection
+from rest_framework import status, viewsets
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+from .models import Cliente, Profissional, Servico, Usuario
+from .serializers import ClienteSerializer, ProfissionalSerializer, ServicoSerializer, UsuarioSerializer
 
 # Arquivo para armazenar mensagens do chat
 CHAT_MESSAGES_FILE = os.path.join(os.path.dirname(__file__), 'chat_messages.json')
@@ -79,7 +81,7 @@ def register(request):
             'role': role
         }, status=status.HTTP_201_CREATED)
 
-    except Exception as e:
+    except (IntegrityError, ValueError, TypeError, KeyError) as e:
         return Response({'erro': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
@@ -189,7 +191,7 @@ def meus_agendamentos(request):
         return Response({'erro': 'Usuário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
     except Cliente.DoesNotExist:
         return Response({'erro': 'Perfil de cliente não encontrado'}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
+    except DatabaseError as e:
         return Response({'erro': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def _load_chat_messages():
@@ -259,5 +261,5 @@ def chat_messages(request):
                 'data': message
             }, status=status.HTTP_201_CREATED)
 
-    except Exception as e:
+    except (OSError, json.JSONDecodeError, KeyError, TypeError) as e:
         return Response({'erro': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
