@@ -54,6 +54,21 @@ jobs:
         working-directory: agendeja_rest
         run: python manage.py check
 
+      - name: Instalar Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Gerar diagrama de classes UML (domínio)
+        working-directory: agendeja_rest
+        run: |
+          mkdir -p ../docs/uml
+          pyreverse -o png -p AgendeJaDominio --output-directory ../docs/uml servicos.models
+
+      - name: Publicar diagrama de classes UML
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagrama-classes-uml
+          path: docs/uml/classes_AgendeJaDominio.png
+
       - name: Compilar o servidor SOAP
         working-directory: soap
         run: javac -cp "lib/*" -d build src/com/agendeja/soap/*.java
