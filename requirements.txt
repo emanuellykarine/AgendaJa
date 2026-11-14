@@ -20,4 +20,4 @@ websockets==17.1
 # PADRÃO DE CODIFICAÇÃO
 ruff==0.16.9
 # DETECÇÃO DE CÓDIGO DUPLICADO
-pylint==3.3.9
+pylint==4.0.9
