@@ -4,7 +4,7 @@ import json
 from mq.runner import start_consumer
 
 def start_mq_consumer(loop, broadcast_message):
-    def callback(ch, method, properties, body):
+    def callback(_ch, _method, _properties, body):
         dados = json.loads(body)
         msg = json.dumps(dados)
 

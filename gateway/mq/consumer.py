@@ -1,8 +1,9 @@
-import json
 import asyncio
-import websockets
-import threading
+import json
 import os
+import threading
+
+import websockets
 
 from runner import start_consumer
 
@@ -14,7 +15,7 @@ async def enviar_ws(msg):
             print("Consumer conectado ao gateway")
             await ws.send(msg)
             print("Consumer enviou:", msg)
-    except Exception as e:
+    except (OSError, websockets.exceptions.WebSocketException) as e:
         print("Erro ao enviar:", e)
 
 def executar_async(msg):
@@ -26,7 +27,7 @@ def executar_async(msg):
     finally:
         loop.close()
 
-def callback(ch, method, properties, body):
+def callback(_ch, _method, _properties, body):
     dados = json.loads(body)
     print("Mensagem recebida do RabbitMQ:", dados)
 
