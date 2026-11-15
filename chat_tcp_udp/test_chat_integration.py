@@ -58,7 +58,7 @@ class ChatTestClient:
         """Conecta ao servidor UDP"""
         try:
             self.udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.udp_socket.bind(('', 0))  # Porta aleatória
+            self.udp_socket.bind((UDP_HOST, 0))  # Porta aleatória, apenas na interface local
 
             # Registrar no servidor UDP
             register_data = {

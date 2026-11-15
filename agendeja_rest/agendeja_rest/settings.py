@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 
+from django.core.management.utils import get_random_secret_key
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,13 +22,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^-jgu_9ii)zljin#_e38z2wx15-$qq7q@-09k98s-5r=e!8ntq'
+# A chave vem do ambiente; sem ela, gera uma aleatória a cada execução (apenas para desenvolvimento).
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY') or get_random_secret_key()
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Debug desligado por padrão; ative com DJANGO_DEBUG=true somente em desenvolvimento.
+DEBUG = os.getenv('DJANGO_DEBUG', 'false').lower() == 'true'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
