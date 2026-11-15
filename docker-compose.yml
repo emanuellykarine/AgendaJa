@@ -18,6 +18,7 @@ services:
     container_name: agendeja-rest
     environment:
       DJANGO_DB_PATH: /data/db.sqlite3
+      DJANGO_ALLOWED_HOSTS: rest,localhost,127.0.0.1
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8001"
     volumes:
       - db_data:/data

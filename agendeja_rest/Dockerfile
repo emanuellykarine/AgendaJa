@@ -10,6 +10,11 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY agendeja_rest /app/agendeja_rest
 
+# Usuário sem privilégios; /data é o volume do SQLite compartilhado com o SOAP (mesmo UID).
+RUN useradd --create-home --uid 1001 app
+RUN mkdir -p /data && chown app:app /data
+USER app
+
 WORKDIR /app/agendeja_rest
 
 EXPOSE 8001

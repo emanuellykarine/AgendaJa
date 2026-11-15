@@ -22,6 +22,9 @@ SOAP_WSDL = os.getenv("SOAP_WSDL", "http://localhost:8088/soap/agendamento?wsdl"
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
 ENABLE_EMBEDDED_CONSUMER = os.getenv("ENABLE_EMBEDDED_CONSUMER", "false").lower() == "true"
 HTTP_TIMEOUT = 10
+CORS_ORIGINS = os.getenv(
+    "CORS_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500"
+).split(",")
 
 soap_client = None
 
@@ -55,7 +58,7 @@ app = FastAPI(title="API Gateway - AgendeJá", lifespan=lifespan)
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -108,7 +111,7 @@ def listar_servicos():
 
 @app.get("/servicos/{profissional_id}", tags=["Serviços"])
 def listar_servicos_profissional(profissional_id: int):
-    resp = requests.get(f"{REST_URL}/servicos/?profissional={profissional_id}", timeout=HTTP_TIMEOUT)
+    resp = requests.get(f"{REST_URL}/servicos/", params={"profissional": profissional_id}, timeout=HTTP_TIMEOUT)
     return resp.json()
 
 @app.post("/servicos", tags=["Serviços"])
@@ -119,6 +122,8 @@ async def criar_servico(request: Request):
 
 @app.delete("/servicos/{servico_id}", tags=["Serviços"])
 def deletar_servico(servico_id: int):
+    # servico_id é validado como int pelo FastAPI, então não há como injetar uma URL arbitrária.
+    # nosemgrep: python.flask.security.injection.ssrf-requests.ssrf-requests
     resp = requests.delete(f"{REST_URL}/servicos/{servico_id}/", timeout=HTTP_TIMEOUT)
     return {"sucesso": resp.status_code == 204}
 
