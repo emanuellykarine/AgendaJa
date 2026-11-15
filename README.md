@@ -1,4 +1,4 @@
-# 🔷 AgendeJá - Sistema Distribuído (REST + SOAP + WebSocket + Mensageria + API Gateway)
+# AgendeJá - Sistema Distribuído (REST + SOAP + WebSocket + Mensageria + API Gateway)
 
 Este projeto implementa uma arquitetura distribuída contendo:
 
