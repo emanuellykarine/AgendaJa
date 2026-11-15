@@ -38,6 +38,20 @@ jobs:
       - name: Detectar code smells
         run: pylint --disable=all --enable=broad-exception-caught,missing-timeout,unused-argument,wrong-import-order agendeja_rest/agendeja_rest agendeja_rest/servicos gateway
 
+      - name: Detectar falhas de segurança no código Python (Bandit)
+        run: bandit -r agendeja_rest gateway chat_tcp_udp -x agendeja_rest/servicos/migrations
+
+      - name: Instalar Semgrep
+        if: ${{ !cancelled() }}
+        run: pipx install semgrep==1.185.0
+
+      - name: Detectar bugs e falhas de segurança (Semgrep)
+        if: ${{ !cancelled() }}
+        run: >-
+          semgrep scan --error --metrics=off
+          --config p/python --config p/django --config p/javascript
+          --config p/dockerfile --config p/github-actions --config p/secrets
+
       - name: Detectar depreciações Python em runtime
         run: python -W error::DeprecationWarning -m pytest
 

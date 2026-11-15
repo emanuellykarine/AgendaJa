@@ -21,3 +21,5 @@ websockets==17.4
 ruff==0.17.4
 # DETECÇÃO DE CÓDIGO DUPLICADO
 pylint==4.0.9
+# ANÁLISE ESTÁTICA DE SEGURANÇA
+bandit==1.9.4
