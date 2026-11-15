@@ -95,7 +95,7 @@
         
         <form id="registerForm">
             <div class="form-group">
-                <label>Tipo de Conta:</label>
+                <label for="tipo">Tipo de Conta:</label>
                 <select id="tipo" required onchange="toggleFields()">
                     <option value="">Selecione...</option>
                     <option value="cliente">Cliente</option>
@@ -104,34 +104,34 @@
             </div>
 
             <div class="form-group">
-                <label>Nome Completo:</label>
+                <label for="nome">Nome Completo:</label>
                 <input type="text" id="nome" required>
             </div>
 
             <div class="form-group">
-                <label>Username:</label>
+                <label for="username">Username:</label>
                 <input type="text" id="username" required>
             </div>
 
             <div class="form-group">
-                <label>Email:</label>
+                <label for="email">Email:</label>
                 <input type="email" id="email" required>
             </div>
 
             <div class="form-group">
-                <label>Telefone:</label>
+                <label for="telefone">Telefone:</label>
                 <input type="tel" id="telefone" placeholder="(00) 00000-0000">
             </div>
 
             <div class="form-group">
-                <label>Senha:</label>
+                <label for="password">Senha:</label>
                 <input type="password" id="password" required>
             </div>
 
             <!-- campos especificos cliente -->
             <div id="clienteFields" class="hidden">
                 <div class="form-group">
-                    <label>CPF:</label>
+                    <label for="cpf">CPF:</label>
                     <input type="text" id="cpf" placeholder="000.000.000-00">
                 </div>
             </div>
@@ -139,11 +139,11 @@
             <!-- Campos específicos Profissional -->
             <div id="profissionalFields" class="hidden">
                 <div class="form-group">
-                    <label>CNPJ:</label>
+                    <label for="cnpj">CNPJ:</label>
                     <input type="text" id="cnpj" placeholder="00.000.000/0000-00">
                 </div>
                 <div class="form-group">
-                    <label>Especialidade:</label>
+                    <label for="especialidade">Especialidade:</label>
                     <input type="text" id="especialidade" placeholder="Ex: Barbeiro, Cabeleireiro">
                 </div>
             </div>
