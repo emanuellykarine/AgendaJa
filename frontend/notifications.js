@@ -288,7 +288,7 @@ function saveNotificationCount() {
 function restoreNotificationCount() {
     const saved = localStorage.getItem('notificationCount');
     if (saved) {
-        globalNotificationCount = parseInt(saved, 10);
+        globalNotificationCount = Number.parseInt(saved, 10);
     }
 }
 

@@ -122,7 +122,7 @@ async function deletarServico(id) {
         const response = await fetch(`${API}/servicos/${id}`, { method: 'DELETE' });
         if (response.ok) {
             alert('Serviço excluído com sucesso!');
-            carregarServicosProfissional();
+            await carregarServicosProfissional();
         } else {
             alert('Erro ao excluir serviço');
         }
@@ -210,7 +210,7 @@ async function agendar() {
         
         const json = await r.json();
         alert(json.mensagem || 'Agendamento realizado!');
-        listarAgendamentos();
+        await listarAgendamentos();
     } catch (err) {
         console.error(err);
         alert('Erro ao agendar.');
@@ -231,7 +231,7 @@ async function cancelar() {
         
         const json = await r.json();
         alert(json.mensagem || 'Cancelamento realizado.');
-        listarAgendamentos();
+        await listarAgendamentos();
     } catch (err) {
         console.error(err);
         alert('Erro ao cancelar.');
