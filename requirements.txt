@@ -4,7 +4,7 @@ djangorestframework==3.18.3
 # Caso queira o painel administrativo mais bonito (opcional)
 django-cors-headers==4.9.0
 # API GATEWAY (FastAPI)
-fastapi==0.141.1
+fastapi==0.165.0
 uvicorn==0.54.0
 # CLIENTE SOAP EM PYTHON
 zeep==4.3.3
